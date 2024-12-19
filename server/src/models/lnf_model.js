@@ -2,29 +2,33 @@ import mongoose from "mongoose";
 
 const lnfSchema = new mongoose.Schema(
     {
-        senderId : {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User",
-            required : true
+        messages: [
+            {
+                senderId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User",
+                    required: true,
+                },
+                text: {
+                    type: String,
+                },
+                image: {
+                    type: String,
+                },
+                type: {
+                    type: String, // "lost" or "found"
+                    required: true,
+                },
+            },
+        ],
+        place: {
+            type: String,
+            required: true,
         },
-        receiverId : {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User",
-            required : true
-        },
-        text : {
-            type : String,
-        },        
-        image : {
-            type : String,
-        },
-        state : {
-            type : String, //Lost or Found
-        }
     },
-    {timestamps : true}
-)
+    { timestamps: true }
+);
 
-const Message = mongoose.model("Lnf", messageSchema)
+const LnF = mongoose.model("LnF", lnfSchema);
 
-export default Message;
+export default LnF;

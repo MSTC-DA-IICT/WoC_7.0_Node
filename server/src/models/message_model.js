@@ -1,27 +1,34 @@
 import mongoose from "mongoose";
 
-const messageSchema = new mongoose.Schema(
+const qnaSchema = new mongoose.Schema(
     {
-        senderId : {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User",
-            required : true
+        messages: [
+            {
+                senderId: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User",
+                    required: true,
+                },
+                text: {
+                    type: String,
+                },
+                image: {
+                    type: String,
+                },
+                type: {
+                    type: String, // "question" or "answer"
+                    required: true,
+                },
+            },
+        ],
+        category: {
+            type: String,
+            required: true,
         },
-        receiverId : {
-            type : mongoose.Schema.Types.ObjectId,
-            ref : "User",
-            required : true
-        },
-        text : {
-            type : String,
-        },        
-        image : {
-            type : String,
-        }
     },
-    {timestamps : true}
-)
+    { timestamps: true }
+);
 
-const Message = mongoose.model("Message", messageSchema)
+const Message = mongoose.model("Message", qnaSchema);
 
 export default Message;

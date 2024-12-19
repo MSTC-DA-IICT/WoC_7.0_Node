@@ -21,4 +21,4 @@ const mailSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Imp_mails", mailSchema);
+export default mongoose.model("ImpMail", mailSchema);

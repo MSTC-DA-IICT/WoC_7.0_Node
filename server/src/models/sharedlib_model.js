@@ -2,26 +2,35 @@ import mongoose from "mongoose";
 
 const acadSchema = new mongoose.Schema(
   {
-    category: {
-      type: String,
-      required: true,
+    category: 
+    { 
+      type: String, 
+      required: true 
     },
-    courceTofile_map: [
+    courses: [
       {
-        course: {
-          type: String, // Course name or identifier
-          required: true,
+        name: 
+        { 
+          type: String,
+          required: true 
         },
         files: [
           {
-            url: {
-              type: String, // File URL or path
-              required: true,
+            name: 
+            { 
+              type: String, 
+              required: true 
             },
-            name: {
-              type: String, // File name
-              required: true,
+            url: 
+            { 
+              type: String, 
+              required: true 
             },
+
+            public_id : {
+              type: String, 
+              required: true
+            }
           },
         ],
       },
