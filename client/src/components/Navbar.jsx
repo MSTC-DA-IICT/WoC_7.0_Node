@@ -23,11 +23,17 @@ const Navbar = () => {
                         </div>
                         <ul
                             tabIndex={0}
-                            className="menu menu-sm dropdown-content bg-primary text-black rounded-box z-[1] mt-3 w-52 p-2 shadow">
+                            className="menu menu-sm dropdown-content outline outline-1 outline-primary text-primary rounded-box z-[1] mt-3 w-52 p-2 shadow">
                             <li><Link to="/qna" className="text-xl">QnA</Link></li>
                             <li><Link to="/sharedlib" className="text-xl">Library</Link></li>
                             <li><Link to="/emails" className="text-xl">ImpMails</Link></li>
-                            <li><Link to="/lnf" className="text-xl">LnF</Link></li>
+                            <li>
+                                <a className="text-xl">Lnf</a>
+                                <ul className="p-2">
+                                    <li><Link to="/lost" className="text-xl">Lost</Link></li>
+                                    <li><Link to="/found" className="text-xl">Found</Link></li>
+                                </ul>
+                            </li>
                         </ul>
                     </div>
                     <Link to="/" className="btn btn-ghost text-2xl">aDApt</Link>
@@ -37,7 +43,15 @@ const Navbar = () => {
                         <li><Link to="/qna" className="text-xl">QnA</Link></li>
                         <li><Link to="/sharedlib" className="text-xl">Library</Link></li>
                         <li><Link to="/emails" className="text-xl">ImpMails</Link></li>
-                        <li><Link to="/lnf" className="text-xl">LnF</Link></li>
+                        <li>
+                            <details>
+                                <summary className="text-xl">LnF</summary>
+                                <ul className="p-2 outline outline-2 outline-primary text-primary">
+                                    <li><Link to="/lost" className="text-xl">Lost</Link></li>
+                                    <li><Link to="/found" className="text-xl">Found</Link></li>
+                                </ul>
+                            </details>
+                        </li>
                     </ul>
                 </div>
                 <div className="navbar-end">

@@ -23,11 +23,9 @@ const LoginPg = () => {
     }
 
     return (
-        //for larger screen (lg) it would be grid of 2 columns
         <>
-            <div className='min-h-screen grid lg:grid-cols-2'>
-                {/* left-side  sm : smaller screen*/}
-                <div className='flex flex-col justify-center items-center p-6 sm:p-12'>
+            <div className='min-h-screen '>
+                <div className='flex flex-col justify-center items-center mt-12 p-6 sm:p-12'>
                     <div className='w-full max-w-md spce-y-8'>
                         <div className='text-center mb-8'>
                             <div className='flex flex-col items-center gap-2 group'>

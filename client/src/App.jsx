@@ -9,7 +9,8 @@ import {Loader} from 'lucide-react'
 import QnAPg from './pages/QnAPg.jsx'
 import SharedlibPg from './pages/SharedlibPg.jsx'
 import EmailPg from './pages/EmailPg.jsx'
-import LnFPg from './pages/LnFPg.jsx'
+import LostPg from './pages/LostPg.jsx'
+import FoundPg from './pages/FoundPg.jsx'
 
 const App = () => {
   const {authUser, checkAuth, isCheckingAuth} = useAuthStore()
@@ -36,7 +37,8 @@ const App = () => {
           <Route path='/qna' element = {!authUser? <QnAPg/> : <Navigate to='/'/>}/>
           <Route path='/sharedlib' element = {!authUser? <SharedlibPg/> : <Navigate to='/'/>}/>
           <Route path='/emails' element = {!authUser? <EmailPg/> : <Navigate to='/'/>}/>
-          <Route path='/lnf' element = {!authUser? <LnFPg/> : <Navigate to='/'/>}/>
+          <Route path='/lost' element = {!authUser? <LostPg/> : <Navigate to='/'/>}/>
+          <Route path='/found' element = {!authUser? <FoundPg/> : <Navigate to='/'/>}/>
         </Routes>
       </div>
     </BrowserRouter>
