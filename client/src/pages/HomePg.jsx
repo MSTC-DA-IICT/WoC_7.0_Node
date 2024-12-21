@@ -1,59 +1,57 @@
 import React from 'react';
 
 const HomePg = () => {
-  return (
-    <div className="font-sans bg-gray-100 min-h-screen">
-      {/* Navbar */}
-      <nav className="bg-blue-600 p-4 shadow-md">
-        <div className="max-w-6xl mx-auto flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="text-white text-2xl font-bold">aDApt</div>
-          </div>
-          <ul className="flex space-x-8">
-            <li><a href="#" className="text-white hover:text-gray-300">Home</a></li>
-            <li><a href="#features" className="text-white hover:text-gray-300">Features</a></li>
-            <li><a href="#about" className="text-white hover:text-gray-300">About</a></li>
-            <li><a href="#contact" className="text-white hover:text-gray-300">Contact</a></li>
-          </ul>
-        </div>
-      </nav>
+    const features = [
+        {
+            title: "Shared Resource Library",
+            description: "Students can access and upload materials, creating a collaborative academic vault. All materials are stored in categories for easy navigation and sharing.",
+        },
+        {
+            title: "Q&A Manager",
+            description: "Ask doubts, upload solutions, and organize queries by categories. Admins can manage categories, and students can request new ones.",
+        },
+        {
+            title: "Important Emails and Websites Library",
+            description: "Get quick access to all important email IDs and websites in one organized list. Stay connected and informed at all times.",
+        },
+        {
+            title: "Lost & Found Manager",
+            description: "Upload and find lost items by categories such as CEP, LT, and canteen. Found items are auto-tagged and removed when resolved.",
+        },
+    ];
 
-      {/* Hero Section */}
-      <section className="bg-blue-700 text-white py-16">
-        <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Welcome to aDApt</h1>
-          <p className="text-lg md:text-xl mb-8">A collaborative platform for students!</p>
-          <a href="#features" className="bg-orange-500 px-6 py-3 rounded-full text-lg hover:bg-orange-400 transition">Learn More</a>
-        </div>
-      </section>
+    return (
+        <div className="m-6 flex flex-col items-center">
+            <div className="relative bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-primary-content text-center py-12 rounded-lg shadow-lg mb-12 w-full max-w-4xl">
+                <h1 className="text-6xl font-bold text-blue-300 tracking-wide">
+                    aDApt: Collaborative Platform for Students
+                </h1>
+                <p className="text-lg mt-4 text-gray-400 italic">
+                    Where students connect, share, and grow together.
+                </p>
+                <div
+                    className="absolute inset-0 bg-[url('/path/to/code-background-image.jpg')] opacity-10 pointer-events-none"
+                    style={{
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat',
+                        backgroundPosition: 'center',
+                    }}
+                ></div>
+            </div>
 
-      {/* Features Section */}
-      <section id="features" className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl font-bold mb-8">Our Features</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="bg-gray-200 p-8 rounded-lg shadow-lg hover:bg-gray-300 transition">
-              <h3 className="text-xl font-semibold mb-4">Feature 1</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 justify-center max-w-4xl">
+                {features.map((feature, index) => (
+                    <div
+                        key={index}
+                        className="card bg-blue-100 text-gray-800 shadow-md p-6 rounded-lg w-full max-w-sm transform transition-transform duration-300 hover:scale-105 hover:bg-gray-200"
+                    >
+                        <h2 className="text-3xl font-bold mb-4">{feature.title}</h2>
+                        <p className="text-base leading-relaxed">{feature.description}</p>
+                    </div>
+                ))}
             </div>
-            <div className="bg-gray-200 p-8 rounded-lg shadow-lg hover:bg-gray-300 transition">
-              <h3 className="text-xl font-semibold mb-4">Feature 2</h3>
-            </div>
-            <div className="bg-gray-200 p-8 rounded-lg shadow-lg hover:bg-gray-300 transition">
-              <h3 className="text-xl font-semibold mb-4">Feature 3</h3>
-            </div>
-            <div className="bg-gray-200 p-8 rounded-lg shadow-lg hover:bg-gray-300 transition">
-              <h3 className="text-xl font-semibold mb-4">Feature 4</h3>
-            </div>
-          </div>
         </div>
-      </section>
-
-      {/* Footer Section */}
-      <footer className="bg-blue-600 text-white py-4 text-center">
-        <p>&copy; 2024 aDApt. All rights reserved.</p>
-      </footer>
-    </div>
-  );
+    );
 };
 
 export default HomePg;
