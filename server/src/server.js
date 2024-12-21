@@ -21,11 +21,11 @@ app.use(cors({
 app.use(express.json())
 app.use(cookieParser())
 app.use(fileUpload({ useTempFiles: true }));
-app.use("/auth", authRoute)
-app.use("/sharedlib", libRoute)
-app.use("/mail", mailRoute)
-app.use("/qna", qNaRoute)
-app.use("/lnf", lNfRoute)
+app.use("/api/auth", authRoute)
+app.use("/api/sharedlib", libRoute)
+app.use("/api/mail", mailRoute)
+app.use("/api/qna", qNaRoute)
+app.use("/api/lnf", lNfRoute)
 
 app.listen(PORT, () => {
     console.log("server is running on port : " + PORT)

@@ -7,10 +7,13 @@ import cloudinary from "../lib/cloudinary.js"; // Adjust the path to your cloudi
 export const getQnAPerCategory = async (req, res) => {
     try {
         const { category } = req.params;
-        const messages = await Message.find({ category });
-        res.status(200).json(messages);
+        const messages = await Message.findOne({ category });
+        if (!messages) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+        res.status(200).json(messages.messages);
     } catch (error) {
-        console.log("Error in getQnAPerCategory:", error.message);
+        console.error("Error in getQnAPerCategory:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
@@ -54,105 +57,115 @@ export const removeCategory = async (req, res) => {
     }
 };
 
+
+// Add a question to a specific category
 export const sendQuestion = async (req, res) => {
     try {
+        const { category } = req.params;
         const { text, image } = req.body;
         const senderId = req.user._id;
-        const { category } = req.params;
 
-        let imageUrl;
-
+        let imageUrl = null;
         if (image) {
             const uploadResponse = await cloudinary.uploader.upload(image);
             imageUrl = uploadResponse.secure_url;
         }
 
-        const qnaEntry = await Message.findOne({ category });
-        if (!qnaEntry) {
-            const newQnA = new QnA({
-                category,
-                messages: [{ senderId, text, image: imageUrl, type: "question" }],
-            });
-            await newQnA.save();
-            io.emit("newQuestion", newQnA);
-            return res.status(201).json(newQnA);
+        const categoryEntry = await Message.findOne({ category });
+        if (!categoryEntry) {
+            return res.status(404).json({ message: "Category not found" });
         }
 
-        qnaEntry.messages.push({ senderId, text, image: imageUrl, type: "question" });
-        await qnaEntry.save();
+        const newQuestion = { senderId, text, image: imageUrl, answers: [] };
+        categoryEntry.messages.push(newQuestion);
+        await categoryEntry.save();
 
-        io.emit("newQuestion", qnaEntry);
-        res.status(201).json(qnaEntry);
+        io.emit("newQuestion", newQuestion); // Real-time update via socket.io
+        res.status(201).json(newQuestion);
     } catch (error) {
         console.error("Error in sendQuestion:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
+// Add an answer to a specific question
 export const sendAnswer = async (req, res) => {
     try {
-        const { text, image } = req.body;
-        const senderId = req.user._id;
         const { category } = req.params;
+        const { questionId, text, image } = req.body;
+        const senderId = req.user._id;
 
-        let imageUrl;
-
+        let imageUrl = null;
         if (image) {
             const uploadResponse = await cloudinary.uploader.upload(image);
             imageUrl = uploadResponse.secure_url;
         }
 
-        const qnaEntry = await Message.findOne({ category });
-        if (!qnaEntry) {
+        const categoryEntry = await Message.findOne({ category });
+        if (!categoryEntry) {
             return res.status(404).json({ message: "Category not found" });
         }
 
-        qnaEntry.messages.push({ senderId, text, image: imageUrl, type: "answer" });
-        await qnaEntry.save();
+        const question = categoryEntry.messages.id(questionId);
+        if (!question) {
+            return res.status(404).json({ message: "Question not found" });
+        }
 
-        io.emit("newAnswer", qnaEntry);
-        res.status(201).json(qnaEntry);
+        const newAnswer = { senderId, text, image: imageUrl };
+        question.answers.push(newAnswer);
+        await categoryEntry.save();
+
+        io.emit("newAnswer", { questionId, newAnswer }); // Real-time update via socket.io
+        res.status(201).json(newAnswer);
     } catch (error) {
         console.error("Error in sendAnswer:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
-
-// Get all questions for a specific category
+// Get all questions for a category
 export const getQuestions = async (req, res) => {
     try {
-        const { categoryId } = req.params;
+        const { category } = req.params;
 
-        const category = await Message.findById(categoryId);
-        if (!category) return res.status(404).json({ error: "Category not found" });
+        const categoryEntry = await Message.findOne({ category });
+        if (!categoryEntry) {
+            return res.status(404).json({ message: "Category not found" });
+        }
 
-        const questions = category.messages.filter(
-            (message) => message.type === "question"
-        );
+        const questions = categoryEntry.messages.map((message) => ({
+            _id: message._id,
+            senderId: message.senderId,
+            text: message.text,
+            image: message.image,
+        }));
 
         res.status(200).json(questions);
-    } catch (err) {
-        console.error("Error in getQuestions: ", err.message);
-        res.status(500).json({ error: "Internal server error" });
+    } catch (error) {
+        console.error("Error in getQuestions:", error.message);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
 
-// Get all answers for a specific category
+// Get answers for a specific question
 export const getAnswers = async (req, res) => {
     try {
-        const { categoryId } = req.params;
+        const { category } = req.params;
+        const { questionId } = req.body;
 
-        const category = await Message.findById(categoryId);
-        if (!category) return res.status(404).json({ error: "Category not found" });
+        const categoryEntry = await Message.findOne({ category });
+        if (!categoryEntry) {
+            return res.status(404).json({ message: "Category not found" });
+        }
 
-        const answers = category.messages.filter(
-            (message) => message.type === "answer"
-        );
+        const question = categoryEntry.messages.id(questionId);
+        if (!question) {
+            return res.status(404).json({ message: "Question not found" });
+        }
 
-        res.status(200).json(answers);
-    } catch (err) {
-        console.error("Error in getAnswers: ", err.message);
-        res.status(500).json({ error: "Internal server error" });
+        res.status(200).json(question.answers);
+    } catch (error) {
+        console.error("Error in getAnswers:", error.message);
+        res.status(500).json({ message: "Internal server error" });
     }
 };

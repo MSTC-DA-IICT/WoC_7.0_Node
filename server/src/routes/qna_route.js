@@ -18,7 +18,6 @@ router.post("/categories/add", addCategory); // Add a new category
 router.delete("/categories/:category/remove", removeCategory); // Remove a category
 
 // Routes for Q&A within a category
-router.get("/categories/:category/messages", getQnAPerCategory); // Fetch Q&A for a specific category
 router.post("/categories/:category/questions", sendQuestion); // Post a question
 router.post("/categories/:category/answers", sendAnswer); // Post an answer
 
