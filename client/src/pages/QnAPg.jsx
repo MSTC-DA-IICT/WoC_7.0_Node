@@ -61,7 +61,9 @@ const QnAPg = () => {
         setSelectedQuestionId(questionId);
         setSelectedImg(img);
         setSelectedText(content);
+        console.log(currentCategory)
         await getAnswers(currentCategory, questionId);
+
         setWhat("chat"); // Switch to chat view
     };
 
@@ -84,9 +86,18 @@ const QnAPg = () => {
         <div className='m-4'>
 
             {/* Back Button */}
-            {(what === "qna" || what === "chat") && (
+            {(what === "qna") && (
                 <button
                     className="btn btn-outline btn-primary fixed bottom-5 text-xl "
+                    onClick={goBack}
+                >
+                    Back
+                </button>
+            )}
+
+            {(what === "chat") && (
+                <button
+                    className="btn btn-outline btn-primary fixed z-10 right-4 text-xl "
                     onClick={goBack}
                 >
                     Back
@@ -113,8 +124,8 @@ const QnAPg = () => {
                             <div
                                 tabIndex={0}
                                 role="button"
-                                className="text-xl btn btn-outline btn-primary m-1"
-                                onClick={() => setRender(true)}
+                                className={`text-xl btn btn-outline btn-primary m-1 ${!authUser.isAdmin ? "btn-disabled" : ""}`}
+                                onClick={() => authUser.isAdmin && setRender(true)} // Only allow setting render when isAdmin is true
                             >
                                 Edit
                             </div>
@@ -122,19 +133,20 @@ const QnAPg = () => {
                             <div
                                 tabIndex={0}
                                 role="button"
-                                className="text-xl btn btn-outline btn-success m-1"
-                                onClick={handleAction}
+                                className={`text-xl btn btn-outline btn-success m-1 ${!authUser.isAdmin ? "btn-disabled" : ""}`}
+                                onClick={authUser.isAdmin ? handleAction : undefined} // Only allow action when isAdmin is true
                             >
                                 Okay
                             </div>
                         )}
-                        {(
+                        {authUser.isAdmin && ( // Only show dropdown menu when isAdmin is true
                             <ul tabIndex={0} className="dropdown-content menu text-xl text-black bg-primary rounded-box z-[1] w-52 p-2 m-1 shadow">
                                 <li><a onClick={() => setIt("add")}>Add</a></li>
                                 <li><a onClick={() => setIt("remove")}>Remove</a></li>
                             </ul>
                         )}
                     </div>
+
                     {/* Add/Remove Input */}
                     {render && it === "add" && (
                         <div className='fixed right-4 bottom-48'>
@@ -216,18 +228,18 @@ const QnAPg = () => {
                                 <div className="chat-image avatar">
                                     <div className="size-10 rounded-full border">
                                         <img
-                                            src={answer.file || "https://via.placeholder.com/150"} // Fallback image if answer.image is missing
+                                            src={"https://via.placeholder.com/150"} // Fallback image if answer.image is missing
                                             alt="Avatar"
                                         />
                                     </div>
                                 </div>
 
                                 <div className="chat-bubble flex flex-col">
-                                    <img
+                                    {answer.file && <img
                                         src={answer.file || "https://via.placeholder.com/150"} // Fallback image for chat bubble
                                         alt="Content"
                                         className="sm:max-w-[200px] rounded-md mb-2"
-                                    />
+                                    />}
                                     <p className='text-xl'>{answer.text || "No content available."}</p>
                                 </div>
                             </div>

@@ -6,14 +6,17 @@ import { Users, User, Key, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react
 
 const SignupPg = () => {
     const [showPass, setShowPass] = useState(false)
+    const [showKey, setShowKey] = useState(false)
+
     const [formData, setFormData] = useState({
         fullName: "",
         email: "",
         password: "",
+        admincode: "",
     })
 
     const [admin, setAdmin] = useState(false)
-    const { signup, isSigningUp } = useAuthStore();
+    const { signup, isSigningUp, adminsignup } = useAuthStore();
 
     const validateForm = () => {
         if (!formData.fullName.trim()) return toast.error("Full name is required");
@@ -30,7 +33,10 @@ const SignupPg = () => {
 
         const success = validateForm();
 
-        if (success === true) signup(formData);
+        if (success === true) {
+            if(admin)adminsignup(formData)
+                else signup(formData)
+        }
     };
 
     return (
@@ -129,15 +135,15 @@ const SignupPg = () => {
                                             type={showPass ? "text" : "password"}
                                             className={`input input-bordered w-full pl-10`}
                                             placeholder='******'
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                            value={formData.admincode}
+                                            onChange={(e) => setFormData({ ...formData, admincode: e.target.value })}
                                         />
                                         <button
                                             type="button"
                                             className='absolute inset-y-0 right-0 pr-3 flex items-center'
-                                            onClick={() => setShowPass(!showPass)}
+                                            onClick={() => setShowKey(!showKey)}
                                         >
-                                            {showPass ? (
+                                            {showKey ? (
                                                 <EyeOff className='size-5 text-base-content/40' />
                                             ) : (
                                                 <Eye className='size-5 text-base-content/40' />

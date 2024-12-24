@@ -23,7 +23,7 @@ router.post("/categories/:category/questions",protectRoute, sendQuestion); // Po
 router.post("/categories/:category/answers",protectRoute, sendAnswer); // Post an answer
 
 router.get("/categories/:categoryId/questions", getQuestions);
-router.get("/categories/:categoryId/answers", getAnswers);
+router.post("/categories/:categoryId/answers/get", getAnswers);
 
 
 export default router;

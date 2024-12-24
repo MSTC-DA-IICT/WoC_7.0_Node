@@ -115,12 +115,12 @@ export const sendAnswer = async (req, res) => {
     try {
         const { category } = req.params;
         const { questionId, text, file } = req.body;
-    
+
         if (!req.user) {
             return res.status(401).json({ message: "Unauthorized - User not authenticated" });
         }
         const senderId = req.user._id;
-    
+
         let fileUrl = null;
         if (file) {
             try {
@@ -147,10 +147,10 @@ export const sendAnswer = async (req, res) => {
         console.log("finally here")
         const newAnswer = { senderId, text, file: fileUrl };
         console.log("New Answer:", newAnswer);
-    
+
         question.answers.push(newAnswer); // Debug this if it silently fails
         console.log("Answer added to question:", question);
-    
+
         try {
             await categoryEntry.save();
             console.log("Save successful");
@@ -158,16 +158,16 @@ export const sendAnswer = async (req, res) => {
             console.error("Save Error:", saveError.message);
             return res.status(500).json({ message: "Failed to save answer" });
         }
-    
+
         io.emit("newAnswer", { questionId, newAnswer });
         console.log("Emit successful");
-    
+
         res.status(201).json(newAnswer);
     } catch (error) {
         console.error("Error in sendAnswer:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
-    
+
 };
 
 
@@ -191,7 +191,7 @@ export const getQuestions = async (req, res) => {
         }));
 
         res.status(200).json(questions);
-        
+
     } catch (error) {
         console.error("Error in getQuestions:", error.message);
         res.status(500).json({ message: "Internal server error" });
@@ -204,9 +204,13 @@ export const getAnswers = async (req, res) => {
     try {
         const { categoryId } = req.params;
         const { questionId } = req.body;
+        console.log("categoryId:", categoryId);
+        console.log("questionId:", questionId);
 
-        const categoryEntry = await Message.findOne({ categoryId });
+        const categoryEntry = await Message.findOne({ category: categoryId });
+        console.log(categoryEntry)
         if (!categoryEntry) {
+            console.log("hii")
             return res.status(404).json({ message: "Category not found" });
         }
 

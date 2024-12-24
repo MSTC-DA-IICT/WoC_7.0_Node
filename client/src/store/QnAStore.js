@@ -81,7 +81,7 @@ export const useQnAStore = create((set, get) => ({
     getAnswers: async (category, questionId) => {
         set({ isLoading: true });
         try {
-            const res = await axiosInstance.get(`/qna/categories/${category}/answers`, {
+            const res = await axiosInstance.post(`/qna/categories/${category}/answers/get`, {
                 questionId,
             });
             set({ answers: res.data });

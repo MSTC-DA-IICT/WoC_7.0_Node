@@ -5,18 +5,23 @@ import { Users, Mail, Lock, Key, Eye, EyeOff, Loader2 } from 'lucide-react';
 
 const LoginPg = () => {
     const [showPass, setShowPass] = useState(false);
+    const [showKey, setShowKey] = useState(false)
+    
     const [formData, setFormData] = useState({
         email: "",
         password: "",
+        admincode : "",
     });
-    const [adminKey, setAdminKey] = useState(""); // Separate state for admin key
     const [admin, setAdmin] = useState(false);
-    const { login, isLoggingIn } = useAuthStore();
+    const { login, isLoggingIn, adminlogin } = useAuthStore();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const loginData = admin ? { ...formData, adminKey } : formData; // Include adminKey if admin
-        login(loginData);
+        if(admin){
+            adminlogin(formData)
+        }else{
+            login(formData)
+        }
     };
 
     return (
@@ -101,16 +106,16 @@ const LoginPg = () => {
                                             type={showPass ? "text" : "password"}
                                             className={`input input-bordered w-full pl-10`}
                                             placeholder="Admin Key"
-                                            value={adminKey}
-                                            onChange={(e) => setAdminKey(e.target.value)}
+                                            value={formData.admincode}
+                                            onChange={(e) => setFormData({ ...formData, admincode: e.target.value }) }
                                         />
                                         <button
                                             type="button"
                                             className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                                            onClick={() => setShowPass(!showPass)}
-                                            aria-label={showPass ? "Hide admin key" : "Show admin key"}
+                                            onClick={() => setShowKey(!showKey)}
+                                            aria-label={showKey ? "Hide admin key" : "Show admin key"}
                                         >
-                                            {showPass ? (
+                                            {showKey ? (
                                                 <EyeOff className="size-5 text-base-content/40" />
                                             ) : (
                                                 <Eye className="size-5 text-base-content/40" />
