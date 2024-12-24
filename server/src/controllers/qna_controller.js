@@ -62,25 +62,46 @@ export const removeCategory = async (req, res) => {
 export const sendQuestion = async (req, res) => {
     try {
         const { category } = req.params;
-        const { text, image } = req.body;
+        const { text, file } = req.body; // Access text and Base64 file directly
+
+        // Ensure the user is authenticated
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized - User not authenticated" });
+        }
         const senderId = req.user._id;
 
-        let imageUrl = null;
-        if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadResponse.secure_url;
+        let fileUrl = null;
+
+        // If a file is provided, upload it to Cloudinary
+        if (file) {
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(`data:;base64,${file}`, {
+                    resource_type: "auto", // Automatically detect the file type (e.g., image, video, PDF)
+                });
+                fileUrl = uploadResponse.secure_url;
+            } catch (uploadError) {
+                console.error("File upload error:", uploadError.message);
+                return res.status(500).json({ message: "Failed to upload file" });
+            }
+        } else {
+            console.log("No file provided");
         }
 
+        // Find the category in the database
         const categoryEntry = await Message.findOne({ category });
         if (!categoryEntry) {
             return res.status(404).json({ message: "Category not found" });
         }
 
-        const newQuestion = { senderId, text, image: imageUrl, answers: [] };
+        // Create the new question
+        const newQuestion = { senderId, text, file: fileUrl, answers: [] };
         categoryEntry.messages.push(newQuestion);
         await categoryEntry.save();
 
-        io.emit("newQuestion", newQuestion); // Real-time update via socket.io
+        // Emit the new question event
+        io.emit("newQuestion", newQuestion);
+
+        // Respond with the created question
         res.status(201).json(newQuestion);
     } catch (error) {
         console.error("Error in sendQuestion:", error.message);
@@ -88,72 +109,103 @@ export const sendQuestion = async (req, res) => {
     }
 };
 
+
 // Add an answer to a specific question
 export const sendAnswer = async (req, res) => {
     try {
         const { category } = req.params;
-        const { questionId, text, image } = req.body;
-        const senderId = req.user._id;
-
-        let imageUrl = null;
-        if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadResponse.secure_url;
+        const { questionId, text, file } = req.body;
+    
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized - User not authenticated" });
         }
-
+        const senderId = req.user._id;
+    
+        let fileUrl = null;
+        if (file) {
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(`data:;base64,${file}`, {
+                    resource_type: "auto",
+                });
+                fileUrl = uploadResponse.secure_url;
+                console.log("File URL:", fileUrl);
+            } catch (uploadError) {
+                console.error("File upload error:", uploadError.message);
+                return res.status(500).json({ message: "Failed to upload file" });
+            }
+        }
+        console.log("anyone here")
         const categoryEntry = await Message.findOne({ category });
         if (!categoryEntry) {
             return res.status(404).json({ message: "Category not found" });
         }
-
+        console.log("OR here")
         const question = categoryEntry.messages.id(questionId);
         if (!question) {
             return res.status(404).json({ message: "Question not found" });
         }
-
-        const newAnswer = { senderId, text, image: imageUrl };
-        question.answers.push(newAnswer);
-        await categoryEntry.save();
-
-        io.emit("newAnswer", { questionId, newAnswer }); // Real-time update via socket.io
+        console.log("finally here")
+        const newAnswer = { senderId, text, file: fileUrl };
+        console.log("New Answer:", newAnswer);
+    
+        question.answers.push(newAnswer); // Debug this if it silently fails
+        console.log("Answer added to question:", question);
+    
+        try {
+            await categoryEntry.save();
+            console.log("Save successful");
+        } catch (saveError) {
+            console.error("Save Error:", saveError.message);
+            return res.status(500).json({ message: "Failed to save answer" });
+        }
+    
+        io.emit("newAnswer", { questionId, newAnswer });
+        console.log("Emit successful");
+    
         res.status(201).json(newAnswer);
     } catch (error) {
         console.error("Error in sendAnswer:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
+    
 };
+
 
 // Get all questions for a category
 export const getQuestions = async (req, res) => {
     try {
-        const { category } = req.params;
+        const { categoryId } = req.params; // Use categoryId to match the route
 
-        const categoryEntry = await Message.findOne({ category });
+        // Find the category in the database
+        const categoryEntry = await Message.findOne({ category: categoryId }); // Use categoryId for the query
         if (!categoryEntry) {
             return res.status(404).json({ message: "Category not found" });
         }
 
+        // Extract questions from the category
         const questions = categoryEntry.messages.map((message) => ({
             _id: message._id,
             senderId: message.senderId,
             text: message.text,
-            image: message.image,
+            file: message.file, // Correct key for file
         }));
 
         res.status(200).json(questions);
+        
     } catch (error) {
         console.error("Error in getQuestions:", error.message);
         res.status(500).json({ message: "Internal server error" });
     }
 };
 
+
 // Get answers for a specific question
 export const getAnswers = async (req, res) => {
     try {
-        const { category } = req.params;
+        const { categoryId } = req.params;
         const { questionId } = req.body;
 
-        const categoryEntry = await Message.findOne({ category });
+        const categoryEntry = await Message.findOne({ categoryId });
         if (!categoryEntry) {
             return res.status(404).json({ message: "Category not found" });
         }

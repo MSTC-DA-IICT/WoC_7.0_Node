@@ -11,6 +11,7 @@ import SharedlibPg from './pages/SharedlibPg.jsx'
 import EmailPg from './pages/EmailPg.jsx'
 import LostPg from './pages/LostPg.jsx'
 import FoundPg from './pages/FoundPg.jsx'
+import QnAForm from './components/QnAForm.jsx'
 
 const App = () => {
   const {authUser, checkAuth, isCheckingAuth} = useAuthStore()
@@ -31,14 +32,15 @@ const App = () => {
       <div>
         <Navbar/>  
         <Routes>
-          <Route path='/' element = {!authUser ? <HomePg/> : <Navigate to='/login'/>}/>
+          <Route path='/' element = {authUser ? <HomePg/> : <Navigate to='/login'/>}/>
           <Route path='/signup' element = {!authUser? <SignUpPg/> : <Navigate to='/'/>}/>
           <Route path='/login' element = {!authUser? <LoginPg/> : <Navigate to='/'/>}/>
-          <Route path='/qna' element = {!authUser? <QnAPg/> : <Navigate to='/'/>}/>
-          <Route path='/sharedlib' element = {!authUser? <SharedlibPg/> : <Navigate to='/'/>}/>
-          <Route path='/emails' element = {!authUser? <EmailPg/> : <Navigate to='/'/>}/>
-          <Route path='/lost' element = {!authUser? <LostPg/> : <Navigate to='/'/>}/>
-          <Route path='/found' element = {!authUser? <FoundPg/> : <Navigate to='/'/>}/>
+          <Route path='/qna' element = {authUser? <QnAPg/> : <Navigate to='/'/>}/>
+          <Route path='/sharedlib' element = {authUser? <SharedlibPg/> : <Navigate to='/'/>}/>
+          <Route path='/emails' element = {authUser? <EmailPg/> : <Navigate to='/'/>}/>
+          <Route path='/lost' element = {authUser? <LostPg/> : <Navigate to='/'/>}/>
+          <Route path='/found' element = {authUser? <FoundPg/> : <Navigate to='/'/>}/>
+          <Route path='/qna_upload' element = {authUser? <QnAForm/> : <Navigate to='/'/>}/>
         </Routes>
       </div>
     </BrowserRouter>

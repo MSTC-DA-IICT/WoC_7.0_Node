@@ -9,6 +9,12 @@ export const useQnAStore = create((set, get) => ({
     answers: [],
     isLoading: false,
     what : "",
+    setWhat: (value) => set({ what: value }),
+    setCategories: (value) => set({ categories: value }),
+    setQuestions: (value) => set({ questions: value }),
+    setAnswers: (value) => set({ answers: value }),
+    setIsLoading: (value) => set({ isLoading: value }),
+
 
     // Fetch the list of categories
     getCategories: async () => {
@@ -44,7 +50,7 @@ export const useQnAStore = create((set, get) => ({
     removeCategory: async (category) => {
         set({ isLoading: true });
         try {
-            await axiosInstance.delete(`/categories/${category}`);
+            await axiosInstance.delete(`/qna/categories/${category}/remove`);
             set((state) => ({
                 categories: state.categories.filter((cat) => cat !== category),
             }));
@@ -60,8 +66,10 @@ export const useQnAStore = create((set, get) => ({
     getQuestions: async (category) => {
         set({ isLoading: true });
         try {
-            const res = await axiosInstance.get(`/categories/${category}/questions`);
+            const res = await axiosInstance.get(`/qna/categories/${category}/questions`);
             set({ questions: res.data });
+            console.log(res.data)
+            console.log("Updated questions:", get().questions);
         } catch (error) {
             toast.error("Failed to fetch questions.");
         } finally {
@@ -73,10 +81,12 @@ export const useQnAStore = create((set, get) => ({
     getAnswers: async (category, questionId) => {
         set({ isLoading: true });
         try {
-            const res = await axiosInstance.post(`/categories/${category}/answers`, {
+            const res = await axiosInstance.get(`/qna/categories/${category}/answers`, {
                 questionId,
             });
             set({ answers: res.data });
+            console.log("data")
+            console.log(res.data)
         } catch (error) {
             toast.error("Failed to fetch answers.");
         } finally {
@@ -87,9 +97,17 @@ export const useQnAStore = create((set, get) => ({
     // Send a new question
     sendQuestion: async (category, questionData) => {
         try {
+            console.log("IT's a qdata")
+            console.log(questionData.text)
+            console.log(questionData.image)
             const res = await axiosInstance.post(
-                `/categories/${category}/questions`,
-                questionData
+                `/qna/categories/${category}/questions`,
+                questionData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
             );
             set((state) => ({
                 questions: [...state.questions, res.data],
@@ -104,8 +122,13 @@ export const useQnAStore = create((set, get) => ({
     sendAnswer: async (category, answerData) => {
         try {
             const res = await axiosInstance.post(
-                `/categories/${category}/answers`,
-                answerData
+                `/qna/categories/${category}/answers`,
+                answerData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
             );
             set((state) => ({
                 answers: [...state.answers, res.data],

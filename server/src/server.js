@@ -9,6 +9,7 @@ import fileUpload from "express-fileupload";
 import mailRoute from "./routes/email_route.js"
 import qNaRoute from "./routes/qna_route.js"
 import lNfRoute from "./routes/lnf_route.js"
+import bodyParser from "body-parser"
 
 dotenv.config()
 const app = express() 
@@ -19,6 +20,8 @@ app.use(cors({
     credentials : true,
 }))
 app.use(express.json())
+app.use(bodyParser.json({ limit: "2mb" })); // Adjust size as needed
+app.use(bodyParser.urlencoded({ limit: "2mb", extended: true }));
 app.use(cookieParser())
 app.use(fileUpload({ useTempFiles: true }));
 app.use("/api/auth", authRoute)

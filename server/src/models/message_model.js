@@ -12,7 +12,7 @@ const qnaSchema = new mongoose.Schema(
                 text: {
                     type: String,
                 },
-                image: {
+                file: {
                     type: String,
                 },
 
@@ -26,7 +26,7 @@ const qnaSchema = new mongoose.Schema(
                         text: {
                             type: String,
                         },
-                        image: {
+                        file: {
                             type: String,
                         },
                     },
