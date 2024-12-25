@@ -159,8 +159,10 @@ export const sendAnswer = async (req, res) => {
             return res.status(500).json({ message: "Failed to save answer" });
         }
 
+        console.log("About to emit 'sendAnswer':", { questionId, newAnswer });
         io.emit("newAnswer", { questionId, newAnswer });
-        console.log("Emit successful");
+        console.log("'sendAnswer' emitted");
+
 
         res.status(201).json(newAnswer);
     } catch (error) {

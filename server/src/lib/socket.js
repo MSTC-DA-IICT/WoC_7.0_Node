@@ -8,39 +8,28 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: ["http://localhost:5173"], 
+        methods: ["GET", "POST"],
     },
 });
 
-const userSocketMap = {}; 
-
 io.on("connection", (socket) => {
     console.log("A user connected", socket.id);
+    
+    io.emit("hello", "world");
 
-    const userId = socket.handshake.query.userId;
-    if (userId) userSocketMap[userId] = socket.id;
-
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-    socket.on("sendQuestion", (data) => {
-        io.emit("newQuestion", data);
+    socket.on("connect_error", (err) => {
+        console.error("Socket connection error:", err.message);
     });
+    
 
-    socket.on("sendAnswer", (data) => {
+
+    io.on("sendAnswer", (data) => {
+        console.log("Received 'sendAnswer' event:", data); // Debugging
         io.emit("newAnswer", data);
-    });
-
-    socket.on("sendLostMessage", (data) => {
-        io.emit("newLostMessage", data);
-    });
-
-    socket.on("sendFoundMessage", (data) => {
-        io.emit("newFoundMessage", data);
     });
 
     socket.on("disconnect", () => {
         console.log("A user disconnected", socket.id);
-        if (userId) delete userSocketMap[userId];
-        io.emit("getOnlineUsers", Object.keys(userSocketMap));
     });
 });
 

@@ -12,13 +12,28 @@ const lnfSchema = new mongoose.Schema(
                 text: {
                     type: String,
                 },
-                image: {
+                file: {
                     type: String,
                 },
                 type: {
                     type: String, // "lost" or "found"
                     required: true,
                 },
+                replies: [
+                    {
+                        senderId: {
+                            type: mongoose.Schema.Types.ObjectId,
+                            ref: "User",
+                            required: true,
+                        },
+                        text: {
+                            type: String,
+                        },
+                        file: {
+                            type: String,
+                        },
+                    },
+                ]
             },
         ],
         place: {

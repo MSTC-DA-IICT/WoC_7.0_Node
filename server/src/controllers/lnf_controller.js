@@ -27,7 +27,7 @@ export const addPlace = async (req, res) => {
 export const removePlace = async (req, res) => {
     try {
         const { placeId } = req.params;
-        await LnF.findByIdAndDelete(placeId);
+        await LnF.deleteMany({place : placeId});
         res.status(200).json({ message: "Place deleted successfully" });
     } catch (err) {
         console.error("Error in removePlace: ", err.message);
@@ -37,29 +37,44 @@ export const removePlace = async (req, res) => {
 
 export const sendLostMessage = async (req, res) => {
     try {
-        const { text, image } = req.body;
-        const senderId = req.user._id;
+        const { text, file } = req.body;
         const { place } = req.params;
 
-        let imageUrl;
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized - User not authenticated" });
+        }
+        const senderId = req.user._id;
 
-        if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadResponse.secure_url;
+        let fileUrl = null;
+
+        // If a file is provided, upload it to Cloudinary
+        if (file) {
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(`data:;base64,${file}`, {
+                    resource_type: "auto", // Automatically detect the file type (e.g., file, video, PDF)
+                });
+                fileUrl = uploadResponse.secure_url;
+            } catch (uploadError) {
+                console.error("File upload error:", uploadError.message);
+                return res.status(500).json({ message: "Failed to upload file" });
+            }
+        } else {
+            console.log("No file provided");
         }
 
-        const lnfEntry = await LnF.findOne({ place });
+
+        const lnfEntry = await LnF.findOne({ place : place });
         if (!lnfEntry) {
             const newLnF = new LnF({
                 place,
-                messages: [{ senderId, text, image: imageUrl, type: "lost" }],
+                messages: [{ senderId, text, file: fileUrl, type: "lost" }],
             });
             await newLnF.save();
             io.emit("newLostMessage", newLnF);
             return res.status(201).json(newLnF);
         }
 
-        lnfEntry.messages.push({ senderId, text, image: imageUrl, type: "lost" });
+        lnfEntry.messages.push({ senderId, text, file: fileUrl, type: "lost" });
         await lnfEntry.save();
 
         io.emit("newLostMessage", lnfEntry);
@@ -72,25 +87,40 @@ export const sendLostMessage = async (req, res) => {
 
 export const sendFoundMessage = async (req, res) => {
     try {
-        const { text, image } = req.body;
-        const senderId = req.user._id;
+        const { text, file } = req.body;
         const { place } = req.params;
 
-        let imageUrl;
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized - User not authenticated" });
+        }
+        const senderId = req.user._id;
 
-        if (image) {
-            const uploadResponse = await cloudinary.uploader.upload(image);
-            imageUrl = uploadResponse.secure_url;
+        let fileUrl = null;
+        // console.log(file)
+        // If a file is provided, upload it to Cloudinary
+        if (file) {
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(`data:;base64,${file}`, {
+                    resource_type: "auto", // Automatically detect the file type (e.g., file, video, PDF)
+                });
+                fileUrl = uploadResponse.secure_url;
+            } catch (uploadError) {
+                console.error("File upload error:", uploadError.message);
+                return res.status(500).json({ message: "Failed to upload file" });
+            }
+        } else {
+            console.log("No file provided");
         }
 
-        const lnfEntry = await LnF.findOne({ place });
+        console.log(place)
+        const lnfEntry = await LnF.findOne({ place : place });
         if (!lnfEntry) {
             return res.status(404).json({ message: "Place not found" });
         }
-
-        lnfEntry.messages.push({ senderId, text, image: imageUrl, type: "found" });
+        console.log("or here")
+        lnfEntry.messages.push({ senderId, text, file: fileUrl, type: "found" });
         await lnfEntry.save();
-
+        console.log("finally here")
         io.emit("newFoundMessage", lnfEntry);
         res.status(201).json(lnfEntry);
     } catch (error) {
@@ -103,14 +133,26 @@ export const deleteLostMessage = async (req, res) => {
     try {
         const { placeId, messageId } = req.params;
 
-        const place = await LnF.findById(placeId);
-        if (!place) return res.status(404).json({ error: "Place not found" });
+        // Find the LnF document by place
+        const place = await LnF.findOne({ place: placeId });
+        if (!place) {
+            return res.status(404).json({ error: "Place not found" });
+        }
 
-        const message = place.messages.id(messageId);
-        if (!message || message.type !== "lost")
+        // Find the index of the message in the messages array
+        const messageIndex = place.messages.findIndex(
+            (message) => message._id.toString() === messageId && message.type === "lost"
+        );
+
+        // If the message is not found or it's not of type "lost"
+        if (messageIndex === -1) {
             return res.status(404).json({ error: "Lost message not found" });
+        }
 
-        message.remove();
+        // Remove the message from the messages array
+        place.messages.splice(messageIndex, 1);
+
+        // Save the updated document
         await place.save();
 
         res.status(200).json({ message: "Lost message deleted successfully" });
@@ -120,24 +162,33 @@ export const deleteLostMessage = async (req, res) => {
     }
 };
 
+
 export const deleteFoundMessage = async (req, res) => {
     try {
         const { placeId, messageId } = req.params;
 
-        const place = await LnF.findById(placeId);
-        if (!place) return res.status(404).json({ error: "Place not found" });
+        // Find the LnF document by place
+        const place = await LnF.findOne({ place: placeId });
+        if (!place) {
+            return res.status(404).json({ error: "Place not found" });
+        }
 
-        const message = place.messages.id(messageId);
-        if (!message || message.type !== "found")
-            return res.status(404).json({ error: "Found message not found" });
+        const messageIndex = place.messages.findIndex(
+            (message) => message._id.toString() === messageId && message.type === "found"
+        );
 
-        message.remove();
+        if (messageIndex === -1) {
+            return res.status(404).json({ error: "Lost message not found" });
+        }
+
+        place.messages.splice(messageIndex, 1);
+
         await place.save();
 
-        res.status(200).json({ message: "Found message deleted successfully" });
+        res.status(200).json({ message: "Lost message deleted successfully" });
     } catch (err) {
-        console.error("Error in deleteFoundMessage: ", err.message);
-        res.status(500).json({ error: "Failed to delete found message" });
+        console.error("Error in deleteLostMessage: ", err.message);
+        res.status(500).json({ error: "Failed to delete lost message" });
     }
 };
 
@@ -145,7 +196,7 @@ export const getLostMessage = async (req, res) => {
     try {
         const { placeId } = req.params;
 
-        const place = await LnF.findById(placeId);
+        const place = await LnF.findOne({ place: placeId });
         if (!place) return res.status(404).json({ error: "Place not found" });
 
         const lostMessages = place.messages.filter(
@@ -163,7 +214,7 @@ export const getFoundMessage = async (req, res) => {
     try {
         const { placeId } = req.params;
 
-        const place = await LnF.findById(placeId);
+        const place = await LnF.findOne({ place: placeId });
         if (!place) return res.status(404).json({ error: "Place not found" });
 
         const foundMessages = place.messages.filter(
@@ -174,5 +225,90 @@ export const getFoundMessage = async (req, res) => {
     } catch (err) {
         console.error("Error in getFoundMessage: ", err.message);
         res.status(500).json({ error: "Failed to fetch found messages" });
+    }
+};
+
+export const getReplies = async (req, res) => {
+    try {
+        const { placeId } = req.params;
+        const { msgId } = req.body;
+        console.log("placeId:", placeId);
+        console.log("msgId:", msgId);
+
+        const placeEntry = await LnF.findOne({ place: placeId });
+        console.log(placeEntry)
+        if (!placeEntry) {
+            console.log("hii")
+            return res.status(404).json({ message: "Category not found" });
+        }
+
+        const msg = placeEntry.messages.id(msgId);
+        if (!msg) {
+            return res.status(404).json({ message: "Question not found" });
+        }
+
+        res.status(200).json(msg.replies);
+    } catch (error) {
+        console.error("Error in getReplies:", error.message);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const sendReply = async (req, res) => {
+    try {
+        const { placeId } = req.params;
+        const { msgId, text, file } = req.body;
+
+        if (!req.user) {
+            return res.status(401).json({ message: "Unauthorized - User not authenticated" });
+        }
+        const senderId = req.user._id;
+
+        let fileUrl = null;
+        if (file) {
+            try {
+                const uploadResponse = await cloudinary.uploader.upload(`data:;base64,${file}`, {
+                    resource_type: "auto",
+                });
+                fileUrl = uploadResponse.secure_url;
+                console.log("File URL:", fileUrl);
+            } catch (uploadError) {
+                console.error("File upload error:", uploadError.message);
+                return res.status(500).json({ message: "Failed to upload file" });
+            }
+        }
+        console.log("anyone here")
+        const placeEntry = await LnF.findOne({ place: placeId });
+        if (!placeEntry) {
+            return res.status(404).json({ message: "Category not found" });
+        }
+        console.log("OR here")
+        const msg = placeEntry.messages.id(msgId);
+        if (!msg) {
+            return res.status(404).json({ message: "Question not found" });
+        }
+        console.log("finally here")
+        const newReply = { senderId, text, file: fileUrl };
+        console.log("New Reply:", newReply);
+
+        msg.replies.push(newReply);
+        console.log("Reply added to msg:", msg);
+
+        try {
+            await placeEntry.save();
+            console.log("Save successful");
+        } catch (saveError) {
+            console.error("Save Error:", saveError.message);
+            return res.status(500).json({ message: "Failed to save answer" });
+        }
+
+        console.log(newReply.senderId)
+        io.emit("newReply", { msgId, newReply });
+        console.log("Emit successful");
+
+        res.status(201).json(newReply);
+    } catch (error) {
+        console.error("Error in sendReply:", error.message);
+        res.status(500).json({ message: "Internal server error" });
     }
 };

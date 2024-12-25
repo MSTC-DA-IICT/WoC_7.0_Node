@@ -8,7 +8,9 @@ export const useQnAStore = create((set, get) => ({
     questions: [],
     answers: [],
     isLoading: false,
-    what : "",
+    what: "",
+    qId: "",
+    setQId: (value) => set({ qId: value }),
     setWhat: (value) => set({ what: value }),
     setCategories: (value) => set({ categories: value }),
     setQuestions: (value) => set({ questions: value }),
@@ -22,7 +24,7 @@ export const useQnAStore = create((set, get) => ({
         try {
             const res = await axiosInstance.get("/qna/categories");
             set({ categories: res.data });
-            set({what : "category"})
+            set({ what: "category" })
         } catch (error) {
             toast.error("Failed to fetch categories.");
         } finally {
@@ -142,24 +144,27 @@ export const useQnAStore = create((set, get) => ({
     // Connect socket for real-time updates
     connectSocket: () => {
         const { socket } = useAuthStore.getState(); // Access shared socket instance from Auth store
+        const { authUser } = useAuthStore.getState(); // Get current user info
         if (!socket) return;
 
         // Listen for real-time updates for QnA
-        socket.on("newQuestion", (data) => {
-            set((state) => ({
-                questions: [...state.questions, data],
-            }));
-        });
-
         socket.on("newAnswer", ({ questionId, newAnswer }) => {
-            set((state) => {
-                const updatedQuestions = state.questions.map((question) =>
-                    question._id === questionId
-                        ? { ...question, answers: [...question.answers, newAnswer] }
-                        : question
-                );
-                return { questions: updatedQuestions };
-            });
+            console.log("socket.io");
+
+            // Prevent duplication by checking if the sender is the current user
+            if ((newAnswer.senderId !== authUser._id) && (get().qId === questionId)) {
+                set((state) => ({
+                    answers: [...state.answers, newAnswer], // Correctly update the answers array
+                }));
+                console.log("broadcasted");
+            }
         });
     },
+
+
+    dissconnectSocket: () => {
+        const { socket } = useAuthStore.getState(); // Access shared socket instance from Auth store
+        if (!socket) return;
+        socket.off("newAnswer")
+    }
 }));
