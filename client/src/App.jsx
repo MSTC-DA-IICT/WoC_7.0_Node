@@ -13,6 +13,7 @@ import LostPg from './pages/LostPg.jsx'
 import FoundPg from './pages/FoundPg.jsx'
 import QnAForm from './components/QnAForm.jsx'
 import LnFForm from './components/LnFForm.jsx'
+import EmailForm from './components/EmailForm.jsx'
 
 const App = () => {
   const {authUser, checkAuth, isCheckingAuth} = useAuthStore()
@@ -43,6 +44,7 @@ const App = () => {
           <Route path='/found' element = {authUser? <FoundPg/> : <Navigate to='/'/>}/>
           <Route path='/qna_upload' element = {authUser? <QnAForm/> : <Navigate to='/'/>}/>
           <Route path='/lnf_upload' element = {authUser? <LnFForm/> : <Navigate to='/'/>}/>
+          <Route path='/mail_upload' element = {authUser? <EmailForm/> : <Navigate to='/'/>}/>
         </Routes>
       </div>
     </BrowserRouter>

@@ -11,7 +11,7 @@ export const useEmailStore = create((set, get) => ({
   getCategories: async () => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.get("/categories");
+      const res = await axiosInstance.get("/mail/categories");
       set({ categories: res.data });
     } catch (error) {
       toast.error("Failed to fetch categories.");
@@ -24,7 +24,7 @@ export const useEmailStore = create((set, get) => ({
   getEmails: async (categoryId) => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.get(`/categories/${categoryId}/emails`);
+      const res = await axiosInstance.get(`/mail/categories/${categoryId}/emails`);
       set({ emails: res.data });
     } catch (error) {
       toast.error("Failed to fetch emails.");
@@ -34,10 +34,10 @@ export const useEmailStore = create((set, get) => ({
   },
 
   // Add a new category
-  addCategory: async (categoryData) => {
+  addCategory: async (category) => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.post("/categories/add", categoryData);
+      const res = await axiosInstance.post("/mail/categories/add", {category});
       set((state) => ({ categories: [...state.categories, res.data] }));
       toast.success("Category added successfully.");
     } catch (error) {
@@ -51,9 +51,9 @@ export const useEmailStore = create((set, get) => ({
   removeCategory: async (categoryId) => {
     set({ isLoading: true });
     try {
-      await axiosInstance.delete(`/categories/${categoryId}/remove`);
+      await axiosInstance.delete(`/mail/categories/${categoryId}/remove`);
       set((state) => ({
-        categories: state.categories.filter((category) => category._id !== categoryId),
+        categories: state.categories.filter((category) => category.category !== categoryId),
       }));
       toast.success("Category removed successfully.");
     } catch (error) {
@@ -68,7 +68,7 @@ export const useEmailStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await axiosInstance.post(
-        `/categories/${categoryId}/emails/add`,
+        `/mail/categories/${categoryId}/emails/add`,
         emailData
       );
       set((state) => ({ emails: [...state.emails, res.data] }));
@@ -85,7 +85,7 @@ export const useEmailStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       await axiosInstance.delete(
-        `/categories/${categoryId}/emails/${emailId}/remove`
+        `/mail/categories/${categoryId}/emails/${emailId}/remove`
       );
       set((state) => ({
         emails: state.emails.filter((email) => email._id !== emailId),
@@ -98,3 +98,4 @@ export const useEmailStore = create((set, get) => ({
     }
   },
 }));
+ 

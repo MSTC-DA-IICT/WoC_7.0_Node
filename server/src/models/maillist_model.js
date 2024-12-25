@@ -12,7 +12,7 @@ const mailSchema = new mongoose.Schema(
           type: String, // Course name or identifier
           required: true,
         },
-        mailId: {
+        mail: {
           type: String, // File path, URL, or identifier
           required: true,
         },
@@ -20,5 +20,8 @@ const mailSchema = new mongoose.Schema(
     ],
   }
 );
+ 
+const ImpMail = mongoose.model("ImpMail", mailSchema);
 
-export default mongoose.model("ImpMail", mailSchema);
+export default ImpMail;
+
