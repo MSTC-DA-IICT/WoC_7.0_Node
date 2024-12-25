@@ -9,10 +9,10 @@ export const useLnFStore = create((set, get) => ({
   foundMessages: [],
   isLoading: false,
   what: "",
-  qId : "",
+  qId: "",
   replies: [],
   setWhat: (value) => set({ what: value }),
-  setQId : (value) => set({qId : value}),
+  setQId: (value) => set({ qId: value }),
   // setPlaces: (value) => set({ places: value }),
   // setQuestions: (value) => set({ replys: value }),
   // setAnswers: (value) => set({ answers: value }),
@@ -51,19 +51,19 @@ export const useLnFStore = create((set, get) => ({
   removePlace: async (placeId) => {
     set({ isLoading: true });
     try {
-        await axiosInstance.delete(`/lnf/places/${placeId}/remove`);
-        
-        set((state) => ({
-            places: state.places.filter((place) => place !== placeId), // Correct return statement
-        }));
-        console.log(get().places)
-        toast.success("Place removed successfully.");
+      await axiosInstance.delete(`/lnf/places/${placeId}/remove`);
+
+      set((state) => ({
+        places: state.places.filter((place) => place !== placeId), // Correct return statement
+      }));
+      console.log(get().places)
+      toast.success("Place removed successfully.");
     } catch (error) {
-        toast.error("Failed to remove place.");
+      toast.error("Failed to remove place.");
     } finally {
-        set({ isLoading: false });
+      set({ isLoading: false });
     }
-},
+  },
 
   // Fetch lost messages for a specific place
   getLostMessages: async (placeId) => {
@@ -100,7 +100,7 @@ export const useLnFStore = create((set, get) => ({
         {
           headers: {
             'Content-Type': 'multipart/form-data',
-        },
+          },
         }
       );
       set((state) => ({
@@ -117,10 +117,10 @@ export const useLnFStore = create((set, get) => ({
     try {
       const res = await axiosInstance.post(`/lnf/places/${placeId}/messages/found`, messageData, {
         headers: {
-            'Content-Type': 'application/json',
+          'Content-Type': 'application/json',
         },
-    });
-    
+      });
+
       set((state) => ({
         foundMessages: [...state.foundMessages, res.data],
       }));
@@ -159,46 +159,46 @@ export const useLnFStore = create((set, get) => ({
   getReplies: async (place, msgId) => {
     set({ isLoading: true });
     try {
-        const res = await axiosInstance.post(`/lnf/places/${place}/replies`, {
-            msgId,
-        });
-        set({ replies: res.data });
-        console.log("data")
-        console.log(res.data)
+      const res = await axiosInstance.post(`/lnf/places/${place}/replies`, {
+        msgId,
+      });
+      set({ replies: res.data });
+      console.log("data")
+      console.log(res.data)
     } catch (error) {
-        toast.error("Failed to fetch answers.");
+      toast.error("Failed to fetch answers.");
     } finally {
-        set({ isLoading: false });
+      set({ isLoading: false });
     }
-},
+  },
 
-sendReply: async (place, replyData) => {
-  try {
+  sendReply: async (place, replyData) => {
+    try {
       console.log("IT's a qdata")
       console.log(replyData.text)
       console.log(replyData.image)
       const res = await axiosInstance.post(
-          `/lnf/places/${place}/reply`,
-          replyData,
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
+        `/lnf/places/${place}/reply`,
+        replyData,
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
           },
-          }
+        }
       );
       set((state) => ({
-          replies: [...state.replies, res.data],
+        replies: [...state.replies, res.data],
       }));
       toast.success("Question sent successfully.");
-  } catch (error) {
+    } catch (error) {
       toast.error("Failed to send reply.");
-  }
-},
+    }
+  },
 
 
   // Connect socket for real-time updates
   connectSocket: () => {
-    const {authUser} = useAuthStore.getState();
+    const { authUser } = useAuthStore.getState();
     const { socket } = useAuthStore.getState(); // Access shared socket instance from Auth store
     if (!socket) return;
 
@@ -215,7 +215,7 @@ sendReply: async (place, replyData) => {
     //   }));
     // });
 
-    socket.on("newReply", ({msgId, newReply}) => {
+    socket.on("newReply", ({ msgId, newReply }) => {
       console.log(authUser._id)
       console.log(newReply)
       if ((newReply.senderId !== authUser._id) && (get().qId === msgId)) {
