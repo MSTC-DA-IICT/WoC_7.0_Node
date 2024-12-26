@@ -14,6 +14,7 @@ import FoundPg from './pages/FoundPg.jsx'
 import QnAForm from './components/QnAForm.jsx'
 import LnFForm from './components/LnFForm.jsx'
 import EmailForm from './components/EmailForm.jsx'
+import SharedlibForm from './components/SharedlibForm.jsx'
 
 const App = () => {
   const {authUser, checkAuth, isCheckingAuth} = useAuthStore()
@@ -45,6 +46,7 @@ const App = () => {
           <Route path='/qna_upload' element = {authUser? <QnAForm/> : <Navigate to='/'/>}/>
           <Route path='/lnf_upload' element = {authUser? <LnFForm/> : <Navigate to='/'/>}/>
           <Route path='/mail_upload' element = {authUser? <EmailForm/> : <Navigate to='/'/>}/>
+          <Route path='/file_upload' element = {authUser? <SharedlibForm/> : <Navigate to='/'/>}/>
         </Routes>
       </div>
     </BrowserRouter>

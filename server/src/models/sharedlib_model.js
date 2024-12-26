@@ -9,7 +9,7 @@ const acadSchema = new mongoose.Schema(
     },
     courses: [
       {
-        name: 
+        name:  
         { 
           type: String,
           required: true 
@@ -38,4 +38,7 @@ const acadSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Academic", acadSchema);
+const Academic = mongoose.model("Academic", acadSchema);
+
+export default Academic;
+

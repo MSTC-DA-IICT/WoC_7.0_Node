@@ -11,6 +11,8 @@ import qNaRoute from "./routes/qna_route.js"
 import lNfRoute from "./routes/lnf_route.js"
 import bodyParser from "body-parser"
 import {app, server} from "./lib/socket.js"
+import path,{dirname} from "path";
+import { fileURLToPath } from 'url';
 
 dotenv.config()
 const PORT = process.env.PORT
@@ -20,6 +22,7 @@ app.use(cors({
     credentials : true,
 }))
 app.use(express.json())
+console.log("server.js")
 app.use(bodyParser.json({ limit: "20mb" })); // Adjust size as needed
 app.use(bodyParser.urlencoded({ limit: "20mb", extended: true }));
 app.use(cookieParser())

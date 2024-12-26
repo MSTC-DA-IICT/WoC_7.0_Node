@@ -10,13 +10,16 @@ export const useSharedLibStore = create((set, get) => ({
   isCategories: false,
   isCourses: false,
   isFiles: false,
-
+  catId: (null),
+  csId: (null),
+  setCatId: (value) => set({ catId: value }),
+  setCsId: (value) => set({ csId: value }),
 
   // Fetch all categories
   getCategories: async () => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.get("/course_codes");
+      const res = await axiosInstance.get("/sharedlib/course_codes");
       set({ categories: res.data });
       set({ isCategories: true })
       set({ isCourses: false })
@@ -32,8 +35,9 @@ export const useSharedLibStore = create((set, get) => ({
   getCourses: async (categoryId) => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.get(`/course_codes/${categoryId}/courses`);
+      const res = await axiosInstance.get(`/sharedlib/course_codes/${categoryId}/courses`);
       set({ courses: res.data });
+      console.log(get().courses)
       set({ isCategories: false })
       set({ isCourses: true })
       set({ isFiles: false })
@@ -48,8 +52,10 @@ export const useSharedLibStore = create((set, get) => ({
   getFiles: async (categoryId, courseId) => {
     set({ isLoading: true });
     try {
+      console.log(categoryId)
+      console.log(courseId)
       const res = await axiosInstance.get(
-        `/course_codes/${categoryId}/courses/${courseId}/files`
+        `/sharedlib/course_codes/${categoryId}/courses/${courseId}/files`
       );
       set({ files: res.data });
       set({ isCategories: false })
@@ -63,10 +69,11 @@ export const useSharedLibStore = create((set, get) => ({
   },
 
   // Add a new category
-  addCategory: async (categoryData) => {
+  addCategory: async (category) => {
     set({ isLoading: true });
     try {
-      const res = await axiosInstance.post("/course_codes/add", categoryData);
+      console.log(category)
+      const res = await axiosInstance.post("/sharedlib/course_codes/add", { category });
       set((state) => ({ categories: [...state.categories, res.data] }));
       toast.success("Category added successfully.");
     } catch (error) {
@@ -80,9 +87,9 @@ export const useSharedLibStore = create((set, get) => ({
   removeCategory: async (categoryId) => {
     set({ isLoading: true });
     try {
-      await axiosInstance.post(`/course_codes/${categoryId}/remove`);
+      await axiosInstance.post(`/sharedlib/course_codes/${categoryId}/remove`);
       set((state) => ({
-        categories: state.categories.filter((category) => category._id !== categoryId),
+        categories: state.categories.filter((category) => category.category !== categoryId),
       }));
       toast.success("Category removed successfully.");
     } catch (error) {
@@ -97,10 +104,11 @@ export const useSharedLibStore = create((set, get) => ({
     set({ isLoading: true });
     try {
       const res = await axiosInstance.post(
-        `/course_codes/${categoryId}/courses/add`,
+        `/sharedlib/course_codes/${categoryId}/courses/add`,
         courseData
       );
       set((state) => ({ courses: [...state.courses, res.data] }));
+      console.log(res.data)
       toast.success("Course added successfully.");
     } catch (error) {
       toast.error("Failed to add course.");
@@ -113,11 +121,12 @@ export const useSharedLibStore = create((set, get) => ({
   removeCourse: async (categoryId, courseId) => {
     set({ isLoading: true });
     try {
+      console.log(courseId)
       await axiosInstance.post(
-        `/course_codes/${categoryId}/courses/${courseId}/remove`
+        `/sharedlib/course_codes/${categoryId}/courses/${courseId}/remove`
       );
       set((state) => ({
-        courses: state.courses.filter((course) => course._id !== courseId),
+        courses: state.courses.filter((course) => course.name !== courseId),
       }));
       toast.success("Course removed successfully.");
     } catch (error) {
@@ -131,25 +140,34 @@ export const useSharedLibStore = create((set, get) => ({
   addFile: async (categoryId, courseId, fileData) => {
     set({ isLoading: true });
     try {
+      // Debugging FormData
+      console.log("CategoryId:", categoryId);
+      console.log("CourseId:", courseId);
+      console.log(fileData.name)
+      console.log(fileData.file)
       const res = await axiosInstance.post(
-        `/course_codes/${categoryId}/courses/${courseId}/files/add`,
-        fileData
+        `/sharedlib/course_codes/${categoryId}/courses/${courseId}/files/add`,
+        fileData,
+        
       );
+
       set((state) => ({ files: [...state.files, res.data] }));
       toast.success("File added successfully.");
     } catch (error) {
+      console.error("Failed to add file:", error);
       toast.error("Failed to add file.");
     } finally {
       set({ isLoading: false });
     }
   },
 
+
   // Remove a file
   removeFile: async (categoryId, courseId, fileId) => {
     set({ isLoading: true });
     try {
       await axiosInstance.post(
-        `/course_codes/${categoryId}/courses/${courseId}/files/${fileId}/remove`
+        `/sharedlib/course_codes/${categoryId}/courses/${courseId}/files/${fileId}/remove`
       );
       set((state) => ({
         files: state.files.filter((file) => file._id !== fileId),
