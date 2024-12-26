@@ -53,13 +53,25 @@ const SharedlibForm = () => {
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
+    // Utility function to convert file to Base64
+    const toBase64 = (file) =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = (error) => reject(error);
+        });
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
+
+            const newFile = await toBase64(file); 
+            
             const formData = {
                 name: name.trim(),
-                file: file, // Convert file to Base64
+                file: newFile, // Convert file to Base64
                 fileType,
             };
 
@@ -75,14 +87,7 @@ const SharedlibForm = () => {
         }
     };
 
-    // Utility function to convert file to Base64
-    const toBase64 = (file) =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result.split(',')[1]);
-            reader.onerror = (error) => reject(error);
-        });
+    
 
     return (
         <div className="mt-10 mx-4 outline outline-primary rounded-lg">
