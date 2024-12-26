@@ -140,28 +140,26 @@ export const useSharedLibStore = create((set, get) => ({
   addFile: async (categoryId, courseId, fileData) => {
     set({ isLoading: true });
     try {
-      // Debugging FormData
-      console.log("CategoryId:", categoryId);
-      console.log("CourseId:", courseId);
-      console.log(fileData.name)
-      console.log(fileData.file)
-      const res = await axiosInstance.post(
-        `/sharedlib/course_codes/${categoryId}/courses/${courseId}/files/add`,
-        fileData,
-        
-      );
-
-      set((state) => ({ files: [...state.files, res.data] }));
-      toast.success("File added successfully.");
+        // Create a FormData object
+        // const formData = new FormData();
+        // formData.append('file', fileData.file); // Assuming fileData.file is a File object
+        // formData.append('name', fileData.name); // Append other data as needed
+        // // formData.append('fileType', fileData.file.type); // Append the file type
+      console.log("File object:", fileData.file);
+        const res = await axiosInstance.post(
+            `/sharedlib/course_codes/${categoryId}/courses/${courseId}/files/add`,
+            fileData,
+            
+        )
+        set((state) => ({ files: [...state.files, res.data] }));
+        toast.success("File added successfully.");
     } catch (error) {
-      console.error("Failed to add file:", error);
-      toast.error("Failed to add file.");
+        console.error("Failed to add file:", error);
+        toast.error("Failed to add file.");
     } finally {
-      set({ isLoading: false });
+        set({ isLoading: false });
     }
-  },
-
-
+},
   // Remove a file
   removeFile: async (categoryId, courseId, fileId) => {
     set({ isLoading: true });
@@ -170,7 +168,7 @@ export const useSharedLibStore = create((set, get) => ({
         `/sharedlib/course_codes/${categoryId}/courses/${courseId}/files/${fileId}/remove`
       );
       set((state) => ({
-        files: state.files.filter((file) => file._id !== fileId),
+        files: state.files.filter((file) => file.name !== fileId),
       }));
       toast.success("File removed successfully.");
     } catch (error) {

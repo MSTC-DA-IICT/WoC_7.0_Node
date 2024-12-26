@@ -20,7 +20,7 @@ const SharedlibPg = () => {
     removeCourse,
     catId,
     setCatId,
-    csId, 
+    csId,
     setCsId,
     removeFile
   } = useSharedLibStore();
@@ -69,6 +69,15 @@ const SharedlibPg = () => {
     console.log(category.category)
     await getCourses(category.category);
     setWhat("course"); // Switch to question display
+  };
+
+  const handleActionFile = async () => {
+    
+      await removeFile(catId, csId, inputValue);
+    
+    setRender(false); // Close input field
+    setIt(""); // Reset action
+    setInputValue(""); // Clear input value
   };
 
   const handleCourseClick = async (category) => {
@@ -267,32 +276,65 @@ const SharedlibPg = () => {
       )}
 
       {/* File Section */}
-{what === "file" && (
-  <>
-    <div className="grid gap-8">
-      {files.map((file, index) => (
-        <div
-          className="card outline outline-primary text-primary text-2xl justify-center items-center font-bold flex hover:bg-primary hover:text-black cursor-pointer"
-          key={index}
-          onClick={() => window.open(file.url, "_blank")} // Open file in a new tab/window
-        >
-          <div className="card-body">
-            <div>{file.name}</div>
+      {what === "file" && (
+        <>
+          <div className="grid gap-8">
+            {files.map((file, index) => (
+              <div
+                className="card outline outline-primary text-primary text-2xl justify-center items-center font-bold flex hover:bg-primary hover:text-black cursor-pointer"
+                key={index}
+                onClick={() => window.open(file.url, "_blank")} // Open file in a new tab/window
+              >
+                <div className="card-body">
+                  <div>{file.name}</div>
+                </div>
+              </div>
+            ))}
           </div>
-        </div>
-      ))}
-    </div>
-    <div
-      tabIndex={0}
-      role="button"
-      className="text-xl fixed right-4 bottom-4 btn btn-outline btn-primary m-1"
-    >
-      <Link to="/file_upload" className="text-xl">
-        Add
-      </Link>
-    </div>
-  </>
-)}
+          <div
+            tabIndex={0}
+            role="button"
+            className="text-xl fixed right-4 bottom-4 btn btn-outline btn-primary m-1"
+          >
+            <Link to="/file_upload" className="text-xl">
+              Add
+            </Link>
+          </div>
+          {/* Remove File Button */}
+          <div>
+            {!render ? (
+              <div
+                tabIndex={0}
+                role="button"
+                className={`text-xl btn btn-outline btn-danger fixed right-28 bottom-4 m-1 ${!authUser.isAdmin ? "btn-disabled" : ""}`}
+                onClick={() => authUser.isAdmin && setRender(true)}
+              >
+                Remove
+              </div>
+            ) : (
+              <div
+                tabIndex={0}
+                role="button"
+                className={`text-xl btn btn-outline btn-success fixed right-28 bottom-4 m-1 ${!authUser.isAdmin ? "btn-disabled" : ""}`}
+                onClick={authUser.isAdmin ? handleActionFile : undefined}
+              >
+                Okay
+              </div>
+            )}
+            {render  && (
+              <div className="fixed right-4 bottom-20">
+                <input
+                  type="text"
+                  className="input input-bordered w-full pl-10"
+                  placeholder="Enter File Name"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        </>
+      )}
 
     </div>
   );

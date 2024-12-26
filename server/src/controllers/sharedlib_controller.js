@@ -70,7 +70,7 @@ export const removeCourse = async (req, res) => {
 };
 
 
-
+//here will be the code of file upload
 export const addFile = async (req, res) => {
     const { categoryId, courseId } = req.params;
     const { file, name, fileType } = req.body;
@@ -130,12 +130,17 @@ export const removeFile = async (req, res) => {
         const course = category.courses.id(courseId);
         if (!course) return res.status(404).json({ error: "Course not found" });
 
-        const file = course.files.id(fileId);
-        if (!file) return res.status(404).json({ error: "File not found" });
+        const fileIndex = course.files.findIndex(file => file.name === fileId);
+        if (fileIndex === -1) return res.status(404).json({ error: "File not found" });
 
-        await cloudinary.uploader.destroy(file.public_id);
+        // Get the public_id for cloudinary deletion
+        const fileToDelete = course.files[fileIndex];
+        await cloudinary.uploader.destroy(fileToDelete.public_id);
 
-        file.remove();
+        // Remove the file from the array
+        course.files.splice(fileIndex, 1);
+
+        // Save the updated category
         await category.save();
 
         res.status(200).json({ message: "File deleted successfully" });
